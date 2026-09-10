@@ -1,11 +1,21 @@
-# Build stage: serve the static site with nginx
-FROM nginx:1.27-alpine
+# Build stage: compile the Vite + Svelte + TS app to static assets
+FROM node:20-alpine AS build
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+# Runtime stage: serve the built static assets with nginx
+FROM nginx:1.27-alpine AS runtime
 
 LABEL org.opencontainers.image.title="magicPinhole" \
       org.opencontainers.image.description="Magic Pinhole eyesight improvement product website" \
       org.opencontainers.image.source="https://github.com/NicolaiBlood/magicPinhole"
 
-COPY index.html /usr/share/nginx/html/index.html
+COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 
