@@ -1,10 +1,13 @@
 :root {
   color-scheme: light;
-  --bg: #0f172a;
-  --panel: #1e293b;
-  --accent: #38bdf8;
-  --text: #e2e8f0;
-  --muted: #94a3b8;
+  --bg: #f4f6f9;
+  --panel: #ffffff;
+  --panel-alt: #eef2f7;
+  --accent: #0284c7;
+  --accent-soft: #e0f2fe;
+  --text: #0f172a;
+  --muted: #5b6b7f;
+  --line: #dde4ec;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   line-height: 1.5;
 }
@@ -21,10 +24,16 @@ body {
   color: var(--text);
 }
 
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
 #app {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
+  padding: 2rem 1.25rem 3rem;
 }
