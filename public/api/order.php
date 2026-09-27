@@ -26,6 +26,63 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     respond(405, false, 'Orders are submitted through the website form.');
 }
 
+$host = strtolower($_SERVER['HTTP_HOST'] ?? '');
+$origin_ok = false;
+foreach (['HTTP_ORIGIN', 'HTTP_REFERER'] as $key) {
+    $value = $_SERVER[$key] ?? '';
+    if ($value === '') {
+        continue;
+    }
+    $parsed = parse_url(strtolower($value));
+    if ($parsed !== false && ($parsed['host'] ?? '') === $host) {
+        $origin_ok = true;
+    }
+}
+if (!$origin_ok) {
+    respond(403, false, 'Orders are submitted through the website form.');
+}
+
+$ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$rate_file = __DIR__ . '/.rate.php';
+$now = time();
+$window = 3600;
+$limit = 5;
+$attempts = [];
+if (is_file($rate_file)) {
+    $raw = (string) file_get_contents($rate_file);
+    $raw = preg_replace('/^<\?php exit; /', '', $raw) ?? '';
+    $decoded = json_decode($raw, true);
+    if (is_array($decoded)) {
+        $attempts = $decoded;
+    }
+}
+$recent = [];
+foreach ($attempts as $stored_ip => $timestamps) {
+    if (!is_array($timestamps)) {
+        continue;
+    }
+    $kept = array_values(array_filter(
+        $timestamps,
+        static fn($ts): bool => is_int($ts) && $now - $ts < $window
+    ));
+    if ($kept !== []) {
+        $recent[$stored_ip] = $kept;
+    }
+}
+if (isset($recent[$ip]) && count($recent[$ip]) >= $limit) {
+    respond(429, false, 'Too many requests. Please try again in a little while.');
+}
+$recent[$ip][] = $now;
+$handle = fopen($rate_file, 'c');
+if ($handle !== false) {
+    flock($handle, LOCK_EX);
+    ftruncate($handle, 0);
+    fwrite($handle, '<?php exit; ' . json_encode($recent));
+    fflush($handle);
+    flock($handle, LOCK_UN);
+    fclose($handle);
+}
+
 if (!empty($_POST['website'])) {
     respond(200, true, 'Thanks! Your order has been received.');
 }
