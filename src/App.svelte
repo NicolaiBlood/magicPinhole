@@ -9,7 +9,6 @@
 <main>
   <section class="hero">
     <div class="hero-copy">
-      <div class="badge">Coming soon</div>
       <h1>Magic Pinhole</h1>
       <p class="tagline">
         Forgot your glasses? Look through the hole and the fine print comes
@@ -142,8 +141,6 @@
       />
     </form>
   </section>
-
-  <p class="footnote">We're still building this site. Check back soon.</p>
 </main>
 
 <style>
@@ -166,19 +163,6 @@
     border-radius: 1.25rem;
     padding: 2.5rem;
     box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-  }
-
-  .badge {
-    display: inline-block;
-    background: var(--accent-soft);
-    color: #075985;
-    font-weight: 600;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 0.3rem 0.8rem;
-    border-radius: 999px;
-    margin-bottom: 1.25rem;
   }
 
   h1 {
@@ -323,13 +307,6 @@
 
   .donate form input[type='image'] {
     border: 0;
-  }
-
-  .footnote {
-    color: var(--muted);
-    text-align: center;
-    font-size: 0.95rem;
-    margin: 0;
   }
 
   @media (max-width: 48rem) {
