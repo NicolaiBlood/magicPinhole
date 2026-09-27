@@ -116,6 +116,33 @@
     </div>
   </section>
 
+  <section class="donate" aria-labelledby="donate-heading">
+    <h2 id="donate-heading">Support the project</h2>
+    <p class="donate-note">
+      If you like what we're building, a small donation helps us get the Magic
+      Pinhole made.
+    </p>
+    <form action="https://www.paypal.com/donate" method="post" target="_top">
+      <input type="hidden" name="business" value="XWYQ8A8JDPMWE" />
+      <input type="hidden" name="no_recurring" value="1" />
+      <input type="hidden" name="item_name" value="Donate to Magic Pinhole!" />
+      <input type="hidden" name="currency_code" value="USD" />
+      <input
+        type="image"
+        src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"
+        name="submit"
+        title="PayPal - The safer, easier way to pay online!"
+        alt="Donate with PayPal button"
+      />
+      <img
+        alt=""
+        src="https://www.paypal.com/en_US/i/scr/pixel.gif"
+        width="1"
+        height="1"
+      />
+    </form>
+  </section>
+
   <p class="footnote">We're still building this site. Check back soon.</p>
 </main>
 
@@ -275,6 +302,27 @@
 
   .gallery-stack .portrait img {
     width: min(100%, 26rem);
+  }
+
+  .donate {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 1.25rem;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .donate-note {
+    color: var(--muted);
+    margin: 0 0 1.25rem;
+  }
+
+  .donate form {
+    margin: 0;
+  }
+
+  .donate form input[type='image'] {
+    border: 0;
   }
 
   .footnote {
