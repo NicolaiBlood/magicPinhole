@@ -1,7 +1,10 @@
 <script lang="ts">
   let name = $state('')
   let email = $state('')
-  let address = $state('')
+  let street = $state('')
+  let apt = $state('')
+  let city = $state('')
+  let zip = $state('')
   let website = $state('')
   let submitting = $state(false)
   let submitted = $state(false)
@@ -16,7 +19,10 @@
       const data = new FormData()
       data.set('name', name)
       data.set('email', email)
-      data.set('address', address)
+      data.set('street', street)
+      data.set('apt', apt)
+      data.set('city', city)
+      data.set('zip', zip)
       data.set('website', website)
       const response = await fetch('/api/order.php', { method: 'POST', body: data })
       let body: { ok?: boolean; message?: string } = {}
@@ -70,16 +76,46 @@
       </label>
     </div>
     <label>
-      <span>Shipping address</span>
-      <textarea
-        bind:value={address}
-        name="address"
+      <span>Street address</span>
+      <input
+        bind:value={street}
+        name="street"
         required
-        maxlength="600"
-        rows="3"
+        maxlength="200"
         autocomplete="street-address"
-      ></textarea>
+      />
     </label>
+    <label>
+      <span>Apt / Unit <em>(optional)</em></span>
+      <input
+        bind:value={apt}
+        name="apt"
+        maxlength="30"
+        autocomplete="address-line2"
+      />
+    </label>
+    <div class="fields">
+      <label>
+        <span>City</span>
+        <input
+          bind:value={city}
+          name="city"
+          required
+          maxlength="100"
+          autocomplete="address-level2"
+        />
+      </label>
+      <label>
+        <span>ZIP / Postal code</span>
+        <input
+          bind:value={zip}
+          name="zip"
+          required
+          maxlength="20"
+          autocomplete="postal-code"
+        />
+      </label>
+    </div>
     <input
       class="honeypot"
       bind:value={website}
@@ -126,8 +162,7 @@
     color: var(--muted);
   }
 
-  input,
-  textarea {
+  input {
     font: inherit;
     color: var(--text);
     background: var(--panel-alt);
@@ -136,13 +171,7 @@
     padding: 0.75rem 1rem;
   }
 
-  textarea {
-    resize: vertical;
-    min-height: 4.5rem;
-  }
-
-  input:focus-visible,
-  textarea:focus-visible {
+  input:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-color: var(--accent);

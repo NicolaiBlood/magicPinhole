@@ -89,9 +89,12 @@ if (!empty($_POST['website'])) {
 
 $name = field('name', 100);
 $email = field('email', 254);
-$address = field('address', 600);
+$street = field('street', 200);
+$apt = field('apt', 30);
+$city = field('city', 100);
+$zip = field('zip', 20);
 
-if ($name === '' || $address === '') {
+if ($name === '' || $street === '' || $city === '' || $zip === '') {
     respond(422, false, 'Please enter your name and shipping address.');
 }
 
@@ -116,6 +119,7 @@ flock($handle, LOCK_EX);
 if (fstat($handle)['size'] === 0) {
     fputcsv($handle, ['date', 'name', 'email', 'address']);
 }
+$address = $street . ($apt !== '' ? ' Apt ' . $apt : '') . ', ' . $city . ' ' . $zip;
 fputcsv($handle, [date('c'), $csv_guard($name), $csv_guard($email), $csv_guard($address)]);
 flock($handle, LOCK_UN);
 fclose($handle);
