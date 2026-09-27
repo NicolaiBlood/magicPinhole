@@ -92,6 +92,7 @@ $email = field('email', 254);
 $street = field('street', 200);
 $apt = field('apt', 30);
 $city = field('city', 100);
+$state = field('state', 100);
 $zip = field('zip', 20);
 
 if ($name === '' || $street === '' || $city === '' || $zip === '') {
@@ -119,7 +120,11 @@ flock($handle, LOCK_EX);
 if (fstat($handle)['size'] === 0) {
     fputcsv($handle, ['date', 'name', 'email', 'address']);
 }
-$address = $street . ($apt !== '' ? ' Apt ' . $apt : '') . ', ' . $city . ' ' . $zip;
+$address = $street . ($apt !== '' ? ' Apt ' . $apt : '') . ', ' . $city;
+if ($state !== '') {
+    $address .= ', ' . $state;
+}
+$address .= ' ' . $zip;
 fputcsv($handle, [date('c'), $csv_guard($name), $csv_guard($email), $csv_guard($address)]);
 flock($handle, LOCK_UN);
 fclose($handle);

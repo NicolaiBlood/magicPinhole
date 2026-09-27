@@ -4,6 +4,7 @@
   let street = $state('')
   let apt = $state('')
   let city = $state('')
+  let region = $state('')
   let zip = $state('')
   let website = $state('')
   let submitting = $state(false)
@@ -22,6 +23,7 @@
       data.set('street', street)
       data.set('apt', apt)
       data.set('city', city)
+      data.set('state', region)
       data.set('zip', zip)
       data.set('website', website)
       const response = await fetch('/api/order.php', { method: 'POST', body: data })
@@ -94,7 +96,7 @@
         autocomplete="address-line2"
       />
     </label>
-    <div class="fields">
+    <div class="fields fields-loc">
       <label>
         <span>City</span>
         <input
@@ -103,6 +105,15 @@
           required
           maxlength="100"
           autocomplete="address-level2"
+        />
+      </label>
+      <label>
+        <span>State / Region <em>(optional)</em></span>
+        <input
+          bind:value={region}
+          name="state"
+          maxlength="100"
+          autocomplete="address-level1"
         />
       </label>
       <label>
@@ -146,6 +157,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.25rem;
+  }
+
+  .fields-loc {
+    grid-template-columns: 1.4fr 1fr 1fr;
   }
 
   label {
