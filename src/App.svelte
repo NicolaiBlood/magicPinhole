@@ -253,11 +253,6 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .steps li:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
-  }
-
   .steps p {
     margin: 0;
     color: var(--muted);
@@ -315,12 +310,6 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .face-grid figure:hover,
-  .gallery-stack figure:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
-  }
-
   .face img {
     margin: 0 auto;
     max-height: 18rem;
@@ -357,19 +346,37 @@
   }
 
   .donate form input[type='image'] {
+    padding: 0.75rem 1rem;
     border: 0;
     border-radius: 0.5rem;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .donate form input[type='image']:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+  .donate form input[type='image']:active {
+    transform: scale(0.97);
   }
 
   .donate form input[type='image']:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
+  }
+
+  @media (hover: hover) {
+    .steps li:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .face-grid figure:hover,
+    .gallery-stack figure:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .donate form input[type='image']:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    }
   }
 
   @media (max-width: 48rem) {
