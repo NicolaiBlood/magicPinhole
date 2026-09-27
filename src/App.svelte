@@ -4,6 +4,7 @@
   import viewerPair from './assets/viewer-pair.jpg'
   import renderFront from './assets/render-front.jpg'
   import renderBack from './assets/render-back.jpg'
+  import OrderForm from './OrderForm.svelte'
 </script>
 
 <main>
@@ -113,6 +114,15 @@
         <figcaption>Front and back, side by side.</figcaption>
       </figure>
     </div>
+  </section>
+
+  <section class="order" aria-labelledby="order-heading">
+    <h2 id="order-heading">Reserve yours</h2>
+    <p class="order-note">
+      The first batch isn't made yet. Leave your name and address and we'll
+      save you a spot — no payment needed until they're ready to ship.
+    </p>
+    <OrderForm />
   </section>
 
   <section class="donate" aria-labelledby="donate-heading">
@@ -325,6 +335,21 @@
 
   .gallery-stack .portrait img {
     width: min(100%, 26rem);
+  }
+
+  .order {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 1.5rem;
+    padding: 2.25rem;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .order-note {
+    color: var(--muted);
+    margin: 0 auto 1.75rem;
+    max-width: 34rem;
+    text-align: center;
   }
 
   .donate {

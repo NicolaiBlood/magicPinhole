@@ -1,0 +1,227 @@
+<script lang="ts">
+  let name = $state('')
+  let email = $state('')
+  let address = $state('')
+  let website = $state('')
+  let submitting = $state(false)
+  let submitted = $state(false)
+  let error = $state('')
+
+  async function handleSubmit(event: SubmitEvent) {
+    event.preventDefault()
+    if (submitting || submitted) return
+    submitting = true
+    error = ''
+    try {
+      const data = new FormData()
+      data.set('name', name)
+      data.set('email', email)
+      data.set('address', address)
+      data.set('website', website)
+      const response = await fetch('/api/order.php', { method: 'POST', body: data })
+      let body: { ok?: boolean; message?: string } = {}
+      try {
+        body = await response.json()
+      } catch {
+        throw new Error('The order service is unavailable. Please try again later.')
+      }
+      if (!response.ok || !body.ok) {
+        throw new Error(body.message || 'The order could not be saved. Please try again.')
+      }
+      submitted = true
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'The order could not be saved. Please try again.'
+    } finally {
+      submitting = false
+    }
+  }
+</script>
+
+{#if submitted}
+  <div class="result" role="status">
+    <p class="result-title">You're on the list!</p>
+    <p class="result-note">
+      Thanks, {name}. We've saved your spot and will reach out when the first
+      batch is ready.
+    </p>
+  </div>
+{:else}
+  <form onsubmit={handleSubmit}>
+    <div class="fields">
+      <label>
+        <span>Full name</span>
+        <input
+          bind:value={name}
+          name="name"
+          required
+          maxlength="100"
+          autocomplete="name"
+        />
+      </label>
+      <label>
+        <span>Email <em>(optional)</em></span>
+        <input
+          bind:value={email}
+          name="email"
+          type="email"
+          maxlength="254"
+          autocomplete="email"
+        />
+      </label>
+    </div>
+    <label>
+      <span>Shipping address</span>
+      <textarea
+        bind:value={address}
+        name="address"
+        required
+        maxlength="600"
+        rows="3"
+        autocomplete="street-address"
+      ></textarea>
+    </label>
+    <input
+      class="honeypot"
+      bind:value={website}
+      name="website"
+      tabindex="-1"
+      autocomplete="off"
+      aria-hidden="true"
+    />
+    {#if error}
+      <p class="error" role="alert">{error}</p>
+    {/if}
+    <button type="submit" disabled={submitting}>
+      {submitting ? 'Saving…' : 'Reserve my spot'}
+    </button>
+  </form>
+{/if}
+
+<style>
+  form {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 32rem;
+    margin: 0 auto;
+    text-align: left;
+  }
+
+  .fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  label {
+    display: grid;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #cdc3ea;
+  }
+
+  label em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  input,
+  textarea {
+    font: inherit;
+    color: var(--text);
+    background: var(--panel-alt);
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 4.5rem;
+  }
+
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-color: var(--accent);
+  }
+
+  button {
+    justify-self: center;
+    font: inherit;
+    font-weight: 600;
+    color: #1e1832;
+    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    border: 0;
+    border-radius: 999px;
+    padding: 0.75rem 1.75rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  }
+
+  @media (hover: hover) {
+    button:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  button:not(:disabled):active {
+    transform: scale(0.97);
+  }
+
+  button:disabled {
+    opacity: 0.7;
+    cursor: default;
+  }
+
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .error {
+    margin: 0;
+    color: #fca5a5;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .result {
+    max-width: 32rem;
+    margin: 0 auto;
+    text-align: center;
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    padding: 1.75rem 1.5rem;
+  }
+
+  .result-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #c4b5fd;
+  }
+
+  .result-note {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  @media (max-width: 30rem) {
+    .fields {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
