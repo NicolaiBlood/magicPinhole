@@ -158,21 +158,31 @@
     grid-template-columns: 1.1fr 0.9fr;
     gap: 2.5rem;
     align-items: center;
-    background: var(--panel);
+    background: linear-gradient(180deg, #ffffff 0%, #f4f9fd 100%);
     border: 1px solid var(--line);
-    border-radius: 1.25rem;
-    padding: 2.5rem;
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    border-radius: 1.5rem;
+    padding: 2.75rem;
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.05),
+      0 24px 48px rgba(15, 23, 42, 0.1);
   }
 
   h1 {
-    font-size: clamp(2.25rem, 5vw, 3.25rem);
-    line-height: 1.1;
-    margin: 0 0 0.9rem;
+    font-size: clamp(2.5rem, 6vw, 3.75rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+    margin: 0 0 1rem;
+    background: linear-gradient(135deg, #0f172a 30%, #0284c7 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .tagline {
-    font-size: 1.15rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #0f3c5c;
     margin: 0 0 1rem;
     max-width: 30rem;
   }
@@ -188,15 +198,27 @@
   }
 
   .hero-art img {
-    border-radius: 1rem;
+    border-radius: 1.25rem;
     width: min(100%, 22rem);
     margin: 0 auto;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.14);
   }
 
   h2 {
     font-size: 1.35rem;
-    margin: 0 0 1.25rem;
+    letter-spacing: -0.01em;
+    margin: 0 0 1.5rem;
     text-align: center;
+  }
+
+  h2::after {
+    content: '';
+    display: block;
+    width: 2.5rem;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--accent);
+    margin: 0.75rem auto 0;
   }
 
   figcaption {
@@ -228,6 +250,12 @@
     border: 1px solid var(--line);
     border-radius: 1rem;
     padding: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .steps li:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
   }
 
   .steps p {
@@ -269,6 +297,13 @@
     border: 1px solid var(--line);
     border-radius: 1rem;
     padding: 1.25rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .face-grid figure:hover,
+  .gallery-stack figure:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
   }
 
   .face img {
@@ -289,11 +324,12 @@
   }
 
   .donate {
-    background: var(--panel);
+    background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
     border: 1px solid var(--line);
-    border-radius: 1.25rem;
-    padding: 2rem;
+    border-radius: 1.5rem;
+    padding: 2.25rem;
     text-align: center;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
   }
 
   .donate-note {
@@ -307,6 +343,18 @@
 
   .donate form input[type='image'] {
     border: 0;
+    border-radius: 0.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .donate form input[type='image']:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+  }
+
+  .donate form input[type='image']:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
   }
 
   @media (max-width: 48rem) {
