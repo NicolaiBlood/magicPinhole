@@ -304,6 +304,16 @@
     margin: 1.25rem 0 0;
   }
 
+  .gallery {
+    padding-top: 3rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .gallery h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2rem);
+    margin-bottom: 2rem;
+  }
+
   .gallery-stack {
     display: flex;
     flex-direction: column;
