@@ -381,6 +381,9 @@
   }
 
   .donate form input[type='image'] {
+    width: 12rem;
+    max-width: 100%;
+    height: auto;
     padding: 0.75rem 1rem;
     border: 0;
     border-radius: 0.5rem;
