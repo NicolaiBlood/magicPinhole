@@ -139,7 +139,7 @@
       <p class="error" role="alert">{error}</p>
     {/if}
     <button type="submit" disabled={submitting}>
-      {submitting ? 'Saving…' : 'Reserve my spot'}
+      {submitting ? 'Saving…' : 'Order mine'}
     </button>
   </form>
 {/if}
@@ -155,12 +155,12 @@
 
   .fields {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.25rem;
   }
 
   .fields-loc {
-    grid-template-columns: 1.4fr 1fr 1fr;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
   }
 
   label {
@@ -168,7 +168,7 @@
     gap: 0.5rem;
     font-size: 0.95rem;
     font-weight: 500;
-    color: #cdc3ea;
+    color: var(--text-soft);
   }
 
   label em {
@@ -184,12 +184,21 @@
     border: 1px solid var(--line);
     border-radius: 0.75rem;
     padding: 0.75rem 1rem;
+    min-width: 0;
   }
 
   input:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-color: var(--accent);
+  }
+
+  input:user-invalid {
+    border-color: #f87171;
+  }
+
+  input:user-invalid:focus-visible {
+    outline-color: #f87171;
   }
 
   button {
@@ -222,8 +231,15 @@
   }
 
   button:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--text);
     outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    button {
+      transform: none;
+      transition: none;
+    }
   }
 
   .honeypot {
@@ -236,7 +252,7 @@
 
   .error {
     margin: 0;
-    color: #fca5a5;
+    color: var(--error);
     font-size: 0.9rem;
     text-align: center;
   }
@@ -245,8 +261,8 @@
     max-width: 32rem;
     margin: 0 auto;
     text-align: center;
-    background: rgba(139, 92, 246, 0.12);
-    border: 1px solid var(--line);
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.35);
     border-radius: 1rem;
     padding: 1.75rem 1.5rem;
   }
@@ -255,7 +271,7 @@
     margin: 0 0 0.5rem;
     font-size: 1.1rem;
     font-weight: 700;
-    color: #c4b5fd;
+    color: var(--success);
   }
 
   .result-note {
@@ -265,7 +281,7 @@
 
   @media (max-width: 30rem) {
     .fields {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 </style>

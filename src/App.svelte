@@ -5,10 +5,58 @@
   import renderFront from './assets/render-front.jpg'
   import renderBack from './assets/render-back.jpg'
   import OrderForm from './OrderForm.svelte'
+
+  type Lightbox = { src: string; alt: string; caption: string }
+  let lightbox = $state<Lightbox | null>(null)
+
+  function openLightbox(src: string, alt: string, caption: string) {
+    lightbox = { src, alt, caption }
+  }
+
+  const openBothFaces = () =>
+    openLightbox(
+      viewerBothFaces,
+      'Four moulded viewers laid out showing the front and back engraving',
+      'Moulded in black, engraved on both faces.'
+    )
+
+  const openPair = () =>
+    openLightbox(
+      viewerPair,
+      'Two viewers side by side, one showing each face',
+      'Front and back, side by side.'
+    )
+
+  const reveal = (node: HTMLElement) => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            node.classList.add('is-visible')
+            observer.disconnect()
+          }
+        }
+      },
+      { threshold: 0.12 }
+    )
+    observer.observe(node)
+    return { destroy: () => observer.disconnect() }
+  }
 </script>
 
+<svelte:window
+  onkeydown={(event) => {
+    if (event.key === 'Escape') lightbox = null
+  }}
+/>
+
+<header class="site-header">
+  <a class="brand" href="#top">Magic Pinhole</a>
+  <a class="reserve-link" href="#order">Order yours</a>
+</header>
+
 <main>
-  <section class="hero">
+  <section class="hero" id="top">
     <div class="hero-copy">
       <h1>Magic Pinhole</h1>
       <p class="tagline">
@@ -33,7 +81,7 @@
     </figure>
   </section>
 
-  <section class="how" aria-labelledby="how-heading">
+  <section class="how reveal" use:reveal aria-labelledby="how-heading">
     <h2 id="how-heading">How it works</h2>
     <ol class="steps">
       <li>
@@ -64,7 +112,7 @@
     </p>
   </section>
 
-  <section class="faces" aria-labelledby="faces-heading">
+  <section class="faces reveal" use:reveal aria-labelledby="faces-heading">
     <h2 id="faces-heading">Both sides</h2>
     <div class="face-grid">
       <figure class="face">
@@ -90,34 +138,48 @@
     </div>
   </section>
 
-  <section class="gallery" aria-labelledby="gallery-heading">
+  <section class="gallery reveal" use:reveal aria-labelledby="gallery-heading">
     <h2 id="gallery-heading">The real thing</h2>
     <div class="gallery-stack">
       <figure class="portrait">
-        <img
-          src={viewerBothFaces}
-          alt="Four moulded viewers laid out showing the front and back engraving"
-          width="1050"
-          height="1400"
-          loading="lazy"
-        />
+        <button
+          type="button"
+          class="zoom-trigger"
+          aria-label="Open larger view"
+          onclick={openBothFaces}
+        >
+          <img
+            src={viewerBothFaces}
+            alt="Four moulded viewers laid out showing the front and back engraving"
+            width="1050"
+            height="1400"
+            loading="lazy"
+          />
+        </button>
         <figcaption>Moulded in black, engraved on both faces.</figcaption>
       </figure>
       <figure>
-        <img
-          src={viewerPair}
-          alt="Two viewers side by side, one showing each face"
-          width="1800"
-          height="1012"
-          loading="lazy"
-        />
+        <button
+          type="button"
+          class="zoom-trigger"
+          aria-label="Open larger view"
+          onclick={openPair}
+        >
+          <img
+            src={viewerPair}
+            alt="Two viewers side by side, one showing each face"
+            width="1800"
+            height="1012"
+            loading="lazy"
+          />
+        </button>
         <figcaption>Front and back, side by side.</figcaption>
       </figure>
     </div>
   </section>
 
-  <section class="order" aria-labelledby="order-heading">
-    <h2 id="order-heading">Reserve yours</h2>
+  <section id="order" class="order reveal" use:reveal aria-labelledby="order-heading">
+    <h2 id="order-heading">Order yours</h2>
     <p class="order-note">
       The first batch isn't made yet. Leave your name and address and we'll
       save you a spot — no payment needed until they're ready to ship.
@@ -125,42 +187,114 @@
     <OrderForm />
   </section>
 
-  <section class="donate" aria-labelledby="donate-heading">
+  <section class="donate reveal" use:reveal aria-labelledby="donate-heading">
     <h2 id="donate-heading">Support the project</h2>
     <p class="donate-note">
       If you like what we're building, a small donation helps us get the Magic
       Pinhole made.
     </p>
-    <form action="https://www.paypal.com/donate" method="post" target="_top">
-      <input type="hidden" name="business" value="XWYQ8A8JDPMWE" />
-      <input type="hidden" name="no_recurring" value="1" />
-      <input type="hidden" name="item_name" value="Donate to Magic Pinhole!" />
-      <input type="hidden" name="currency_code" value="USD" />
-      <input
-        type="image"
-        src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"
-        name="submit"
-        title="PayPal - The safer, easier way to pay online!"
-        alt="Donate with PayPal button"
-      />
-      <img
-        alt=""
-        src="https://www.paypal.com/en_US/i/scr/pixel.gif"
-        width="1"
-        height="1"
-      />
-    </form>
+    <div class="donate-card">
+      <form action="https://www.paypal.com/donate" method="post" target="_top">
+        <input type="hidden" name="business" value="XWYQ8A8JDPMWE" />
+        <input type="hidden" name="no_recurring" value="1" />
+        <input type="hidden" name="item_name" value="Donate to Magic Pinhole!" />
+        <input type="hidden" name="currency_code" value="USD" />
+        <input
+          type="image"
+          src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"
+          name="submit"
+          title="PayPal - The safer, easier way to pay online!"
+          alt="Donate with PayPal button"
+        />
+        <img
+          alt=""
+          src="https://www.paypal.com/en_US/i/scr/pixel.gif"
+          width="1"
+          height="1"
+        />
+      </form>
+    </div>
+    <p class="donate-caption">Payments are processed securely by PayPal.</p>
   </section>
+
+  <footer>
+    <p>
+      © {new Date().getFullYear()} Magic Pinhole — a viewer, not a medical
+      device.
+    </p>
+  </footer>
 </main>
 
+{#if lightbox}
+  <div
+    class="lightbox"
+    role="dialog"
+    aria-modal="true"
+    aria-label={lightbox.caption}
+    tabindex="-1"
+    onclick={() => (lightbox = null)}
+    onkeydown={(event) => {
+      if (event.key === 'Escape') lightbox = null
+    }}
+  >
+    <img src={lightbox.src} alt={lightbox.alt} />
+    <p>{lightbox.caption}</p>
+  </div>
+{/if}
+
 <style>
+  .site-header {
+    position: sticky;
+    top: 1rem;
+    z-index: 20;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem 0.75rem 1.5rem;
+    background: rgba(30, 24, 50, 0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-rest);
+  }
+
+  .brand {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .reserve-link {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--bg);
+    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    border-radius: 999px;
+    padding: 0.5rem 1.1rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .reserve-link:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 3px;
+  }
+
   main {
     width: 100%;
     max-width: 68rem;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 3.5rem;
+    gap: 2.5rem;
   }
 
   .hero {
@@ -168,31 +302,36 @@
     grid-template-columns: 1.1fr 0.9fr;
     gap: 2.5rem;
     align-items: center;
-    background: linear-gradient(180deg, #2e2650 0%, #251e3e 100%);
-    border: 1px solid var(--line);
-    border-radius: 1.5rem;
-    padding: 2.75rem;
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.25),
-      0 24px 48px rgba(0, 0, 0, 0.35);
   }
 
   h1 {
+    font-family: var(--font-display);
     font-size: clamp(2.5rem, 6vw, 3.75rem);
     line-height: 1.05;
     letter-spacing: -0.03em;
     font-weight: 800;
     margin: 0 0 1rem;
-    background: linear-gradient(135deg, #f8f6ff 15%, #93c5fd 60%, #c4b5fd 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: #f8f6ff;
+  }
+
+  @supports (-webkit-background-clip: text) or (background-clip: text) {
+    h1 {
+      background: linear-gradient(
+        135deg,
+        #f8f6ff 15%,
+        var(--accent-blue) 60%,
+        var(--accent-light) 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
   }
 
   .tagline {
     font-size: 1.2rem;
     font-weight: 500;
-    color: #cdc3ea;
+    color: var(--text-soft);
     margin: 0 0 1rem;
     max-width: 30rem;
   }
@@ -211,11 +350,35 @@
     border-radius: 1.25rem;
     width: min(100%, 22rem);
     margin: 0 auto;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+    box-shadow:
+      var(--shadow-lift),
+      0 0 0 1px var(--line);
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+
+  .reveal:global(.is-visible) {
+    opacity: 1;
+    transform: none;
+  }
+
+  .how,
+  .faces,
+  .gallery,
+  .order,
+  .donate,
+  footer {
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--line);
   }
 
   h2 {
-    font-size: 1.35rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3.5vw, 2rem);
     letter-spacing: -0.01em;
     margin: 0 0 1.5rem;
     text-align: center;
@@ -276,7 +439,7 @@
     height: 1.75rem;
     border-radius: 999px;
     background: rgba(139, 92, 246, 0.18);
-    color: #c4b5fd;
+    color: var(--accent-light);
     font-weight: 600;
     font-size: 0.85rem;
     margin-bottom: 0.9rem;
@@ -284,12 +447,12 @@
 
   .steps li:nth-child(1) .step-n {
     background: rgba(59, 130, 246, 0.18);
-    color: #93c5fd;
+    color: var(--accent-blue);
   }
 
   .steps li:nth-child(2) .step-n {
     background: rgba(139, 92, 246, 0.18);
-    color: #c4b5fd;
+    color: var(--accent-light);
   }
 
   .steps li:nth-child(3) .step-n {
@@ -302,16 +465,6 @@
     color: var(--muted);
     font-size: 0.9rem;
     margin: 1.25rem 0 0;
-  }
-
-  .gallery {
-    padding-top: 3rem;
-    border-top: 1px solid var(--line);
-  }
-
-  .gallery h2 {
-    font-size: clamp(1.6rem, 3.5vw, 2rem);
-    margin-bottom: 2rem;
   }
 
   .gallery-stack {
@@ -347,12 +500,20 @@
     width: min(100%, 26rem);
   }
 
-  .order {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 1.5rem;
-    padding: 2.25rem;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+  .zoom-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+
+  .zoom-trigger:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 0.75rem;
   }
 
   .order-note {
@@ -363,17 +524,22 @@
   }
 
   .donate {
-    background: linear-gradient(135deg, #2e2650 0%, #292244 55%, #332a58 100%);
-    border: 1px solid var(--line);
-    border-radius: 1.5rem;
-    padding: 2.25rem;
     text-align: center;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
   }
 
   .donate-note {
     color: var(--muted);
     margin: 0 0 1.25rem;
+  }
+
+  .donate-card {
+    display: inline-block;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    padding: 1.25rem 2rem;
+    box-shadow: var(--shadow-rest);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
   .donate form {
@@ -399,28 +565,94 @@
     outline-offset: 3px;
   }
 
+  .donate-caption {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 0.75rem 0 0;
+  }
+
+  footer {
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  footer p {
+    margin: 0;
+  }
+
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    background: rgba(15, 12, 26, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    cursor: zoom-out;
+  }
+
+  .lightbox img {
+    max-width: min(90vw, 48rem);
+    max-height: 78vh;
+    width: auto;
+    height: auto;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-lift);
+  }
+
+  .lightbox p {
+    margin: 0;
+    color: var(--muted);
+  }
+
   @media (hover: hover) {
+    .reserve-link:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-rest);
+    }
+
     .steps li:hover {
       transform: translateY(-3px);
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+      box-shadow: var(--shadow-lift);
     }
 
     .face-grid figure:hover,
     .gallery-stack figure:hover {
       transform: translateY(-3px);
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+      box-shadow: var(--shadow-lift);
+    }
+
+    .donate-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lift);
     }
 
     .donate form input[type='image']:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+      box-shadow: var(--shadow-rest);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reserve-link,
+    .steps li,
+    .face-grid figure,
+    .gallery-stack figure,
+    .donate-card,
+    .donate form input[type='image'] {
+      transform: none;
+      transition: none;
     }
   }
 
   @media (max-width: 48rem) {
     .hero {
       grid-template-columns: 1fr;
-      padding: 1.75rem;
     }
 
     .face-grid,

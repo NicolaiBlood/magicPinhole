@@ -4,7 +4,16 @@
   --panel: #292244;
   --panel-alt: #241d3b;
   --accent: #8b5cf6;
+  --accent-2: #93c5fd;
   --accent-soft: #4c3a78;
+  --success: #86efac;
+  --error: #fca5a5;
+  --text-soft: #cdc3ea;
+  --accent-light: #c4b5fd;
+  --accent-blue: #93c5fd;
+  --shadow-rest: 0 10px 24px rgba(0, 0, 0, 0.3);
+  --shadow-lift: 0 20px 44px rgba(0, 0, 0, 0.42);
+  --font-display: 'Space Grotesk Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --text: #ece8f8;
   --muted: #a79fc4;
   --line: #3d3560;
@@ -38,6 +47,22 @@ h2 {
   text-wrap: balance;
 }
 
+p,
+li,
+figcaption {
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+section[id] {
+  scroll-margin-top: 4.5rem;
+}
+
 img {
   display: block;
   max-width: 100%;
@@ -50,4 +75,13 @@ img {
   flex-direction: column;
   align-items: center;
   padding: 2rem 1.25rem 3rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    transition-duration: 0.01ms;
+  }
 }
