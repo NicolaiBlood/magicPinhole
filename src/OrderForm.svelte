@@ -205,8 +205,8 @@
     justify-self: center;
     font: inherit;
     font-weight: 600;
-    color: #1e1832;
-    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    color: #ffffff;
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
     border: 0;
     border-radius: 999px;
     padding: 0.75rem 1.75rem;
@@ -261,8 +261,8 @@
     max-width: 32rem;
     margin: 0 auto;
     text-align: center;
-    background: rgba(74, 222, 128, 0.1);
-    border: 1px solid rgba(74, 222, 128, 0.35);
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.35);
     border-radius: 1rem;
     padding: 1.75rem 1.5rem;
   }

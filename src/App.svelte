@@ -253,7 +253,7 @@
     align-items: center;
     gap: 1rem;
     padding: 0.75rem 1rem 0.75rem 1.5rem;
-    background: rgba(30, 24, 50, 0.78);
+    background: rgba(255, 255, 255, 0.78);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--line);
@@ -275,7 +275,7 @@
     font-weight: 600;
     font-size: 0.95rem;
     color: var(--bg);
-    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
     border-radius: 999px;
     padding: 0.5rem 1.1rem;
     text-decoration: none;
@@ -311,14 +311,14 @@
     letter-spacing: -0.03em;
     font-weight: 800;
     margin: 0 0 1rem;
-    color: #f8f6ff;
+    color: #000000;
   }
 
   @supports (-webkit-background-clip: text) or (background-clip: text) {
     h1 {
       background: linear-gradient(
         135deg,
-        #f8f6ff 15%,
+        #000000 15%,
         var(--accent-blue) 60%,
         var(--accent-light) 100%
       );
@@ -457,7 +457,7 @@
 
   .steps li:nth-child(3) .step-n {
     background: rgba(245, 158, 11, 0.16);
-    color: #fcd34d;
+    color: #b45309;
   }
 
   .caveat {
@@ -590,7 +590,7 @@
     justify-items: center;
     gap: 1rem;
     padding: 2rem;
-    background: rgba(15, 12, 26, 0.85);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     cursor: zoom-out;
