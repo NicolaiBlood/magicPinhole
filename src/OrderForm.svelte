@@ -11,6 +11,9 @@
   let submitted = $state(false)
   let error = $state('')
 
+  const ORDER_ENDPOINT = (import.meta.env.VITE_ORDER_ENDPOINT as string | undefined) ||
+    'https://magicpinhole-api.deno.dev/order'
+
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault()
     if (submitting || submitted) return
@@ -26,7 +29,7 @@
       data.set('state', region)
       data.set('zip', zip)
       data.set('website', website)
-      const response = await fetch('/api/order.php', { method: 'POST', body: data })
+      const response = await fetch(ORDER_ENDPOINT, { method: 'POST', body: data })
       let body: { ok?: boolean; message?: string } = {}
       try {
         body = await response.json()
