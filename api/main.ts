@@ -25,6 +25,13 @@ const MAX_LENGTHS: Record<string, number> = {
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 3600_000;
 
+type Order = {
+  date: string;
+  name: string;
+  email: string;
+  address: string;
+};
+
 const kv = await Deno.openKv();
 
 function respond(
@@ -58,6 +65,9 @@ async function overRateLimit(ip: string): Promise<boolean> {
 function cleanField(form: FormData, key: string): string {
   const raw = form.get(key);
   const value = typeof raw === "string" ? raw : "";
+  // Strips control characters except tab, newline, and carriage return,
+  // matching the sanitization in the original PHP endpoint.
+  // deno-lint-ignore no-control-regex
   return value.trim().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "");
 }
 
@@ -108,21 +118,34 @@ async function handleOrder(req: Request, origin: string): Promise<Response> {
     );
   }
   if (email !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return respond(422, false, "Please check the email address you entered.", origin);
+    return respond(
+      422,
+      false,
+      "Please check the email address you entered.",
+      origin,
+    );
   }
 
   let address = street + (apt !== "" ? ` Apt ${apt}` : "") + `, ${city}`;
   if (state !== "") address += `, ${state}`;
   address += ` ${zip}`;
 
-  await kv.set(["orders", Date.now()], {
-    date: new Date().toISOString(),
-    name,
-    email,
-    address,
-  });
+  await kv.set(
+    ["orders", Date.now()],
+    {
+      date: new Date().toISOString(),
+      name,
+      email,
+      address,
+    } satisfies Order,
+  );
 
-  return respond(200, true, "Thanks! Your spot on the order list is saved.", origin);
+  return respond(
+    200,
+    true,
+    "Thanks! Your spot on the order list is saved.",
+    origin,
+  );
 }
 
 async function handleOrders(req: Request): Promise<Response> {
@@ -135,9 +158,9 @@ async function handleOrders(req: Request): Promise<Response> {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const rows: { date: string; name: string; email: string; address: string }[] = [];
+  const rows: Order[] = [];
   for await (const entry of kv.list({ prefix: ["orders"] })) {
-    rows.push(entry.value as typeof rows[number]);
+    rows.push(entry.value as Order);
   }
   rows.sort((a, b) => a.date.localeCompare(b.date));
 
@@ -154,7 +177,7 @@ async function handleOrders(req: Request): Promise<Response> {
   });
 }
 
-Deno.serve({ port: Number(Deno.env.get("PORT") ?? 8000) }, async (req) => {
+Deno.serve({ port: Number(Deno.env.get("PORT") ?? 8000) }, (req) => {
   const path = new URL(req.url).pathname;
   if (path === "/orders") return handleOrders(req);
 
