@@ -1,0 +1,8 @@
+services:
+  web:
+    build: .
+    image: magicpinhole:latest
+    container_name: magicpinhole
+    ports:
+      - "8080:80"
+    restart: unless-stopped
