@@ -26,7 +26,10 @@
       data.set('state', region)
       data.set('zip', zip)
       data.set('website', website)
-      const response = await fetch('/api/order.php', { method: 'POST', body: data })
+      const response = await fetch(import.meta.env.BASE_URL + 'api/order.php', {
+        method: 'POST',
+        body: data
+      })
       let body: { ok?: boolean; message?: string } = {}
       try {
         body = await response.json()

@@ -28,6 +28,10 @@
     )
 
   const reveal = (node: HTMLElement) => {
+    if (typeof IntersectionObserver === 'undefined') {
+      node.classList.add('is-visible')
+      return
+    }
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
