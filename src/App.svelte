@@ -8,24 +8,41 @@
 
   type Lightbox = { src: string; alt: string; caption: string }
   let lightbox = $state<Lightbox | null>(null)
+  let lightboxTrigger = $state<HTMLElement | null>(null)
+  let lightboxEl = $state<HTMLElement | null>(null)
 
-  function openLightbox(src: string, alt: string, caption: string) {
+  function openLightbox(src: string, alt: string, caption: string, trigger: HTMLElement) {
+    lightboxTrigger = trigger
     lightbox = { src, alt, caption }
   }
 
-  const openBothFaces = () =>
+  function closeLightbox() {
+    lightbox = null
+    lightboxTrigger?.focus()
+    lightboxTrigger = null
+  }
+
+  const openBothFaces = (event: MouseEvent) =>
     openLightbox(
       viewerBothFaces,
       'Four moulded viewers laid out showing the front and back engraving',
-      'Moulded in black, engraved on both faces.'
+      'Moulded in black, engraved on both faces.',
+      event.currentTarget as HTMLElement
     )
 
-  const openPair = () =>
+  const openPair = (event: MouseEvent) =>
     openLightbox(
       viewerPair,
       'Two viewers side by side, one showing each face',
-      'Front and back, side by side.'
+      'Front and back, side by side.',
+      event.currentTarget as HTMLElement
     )
+
+  $effect(() => {
+    if (lightbox && lightboxEl) {
+      lightboxEl.focus()
+    }
+  })
 
   const reveal = (node: HTMLElement) => {
     if (typeof IntersectionObserver === 'undefined') {
@@ -50,7 +67,7 @@
 
 <svelte:window
   onkeydown={(event) => {
-    if (event.key === 'Escape') lightbox = null
+    if (event.key === 'Escape' && lightbox) closeLightbox()
   }}
 />
 
@@ -230,17 +247,28 @@
 </main>
 
 {#if lightbox}
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
   <div
     class="lightbox"
     role="dialog"
     aria-modal="true"
     aria-label={lightbox.caption}
     tabindex="-1"
-    onclick={() => (lightbox = null)}
-    onkeydown={(event) => {
-      if (event.key === 'Escape') lightbox = null
+    bind:this={lightboxEl}
+    onclick={(event) => {
+      if (event.target === event.currentTarget) closeLightbox()
     }}
   >
+    <button
+      type="button"
+      class="lightbox-close"
+      aria-label="Close"
+      onclick={closeLightbox}
+    >
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </button>
     <img src={lightbox.src} alt={lightbox.alt} />
     <p>{lightbox.caption}</p>
   </div>
@@ -612,6 +640,34 @@
   .lightbox p {
     margin: 0;
     color: var(--muted);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: var(--shadow-rest);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .lightbox-close:hover {
+    transform: scale(1.06);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .lightbox-close:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
   }
 
   @media (hover: hover) {

@@ -1,4 +1,6 @@
 <script lang="ts">
+  const orderDisabled = import.meta.env.VITE_ORDER_DISABLED === 'true'
+
   let name = $state('')
   let email = $state('')
   let street = $state('')
@@ -10,6 +12,7 @@
   let submitting = $state(false)
   let submitted = $state(false)
   let error = $state('')
+  let unavailable = $state(false)
 
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault()
@@ -34,6 +37,10 @@
       try {
         body = await response.json()
       } catch {
+        if (response.status === 404) {
+          unavailable = true
+          return
+        }
         throw new Error('The order service is unavailable. Please try again later.')
       }
       if (!response.ok || !body.ok) {
@@ -41,7 +48,11 @@
       }
       submitted = true
     } catch (err) {
-      error = err instanceof Error ? err.message : 'The order could not be saved. Please try again.'
+      if (err instanceof TypeError) {
+        unavailable = true
+      } else {
+        error = err instanceof Error ? err.message : 'The order could not be saved. Please try again.'
+      }
     } finally {
       submitting = false
     }
@@ -54,6 +65,17 @@
     <p class="result-note">
       Thanks, {name}. We've saved your spot and will reach out when the first
       batch is ready.
+    </p>
+  </div>
+{:else if orderDisabled || unavailable}
+  <div class="result coming-soon" role="status">
+    <p class="result-title">Online ordering is coming soon</p>
+    <p class="result-note">
+      The first batch is still being made. In the meantime, you can email us
+      to reserve your spot:
+    </p>
+    <p class="result-note">
+      <a class="mailto-link" href="mailto:hello@magicpinhole.com?subject=Magic%20Pinhole%20reservation">hello@magicpinhole.com</a>
     </p>
   </div>
 {:else}
@@ -280,6 +302,32 @@
   .result-note {
     margin: 0;
     color: var(--muted);
+  }
+
+  .coming-soon {
+    background: rgba(124, 58, 237, 0.06);
+    border-color: rgba(124, 58, 237, 0.3);
+  }
+
+  .coming-soon .result-title {
+    color: var(--accent);
+  }
+
+  .mailto-link {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+  }
+
+  .mailto-link:hover {
+    color: var(--accent-light);
+  }
+
+  .mailto-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
   }
 
   @media (max-width: 30rem) {

@@ -110,14 +110,15 @@ $csv_guard = static function (string $value): string {
     return $value;
 };
 
-$file = __DIR__ . '/orders.csv';
-$handle = fopen($file, 'c+');
+$file = dirname(dirname(__DIR__)) . '/orders.csv';
+$file_exists = is_file($file) && filesize($file) > 0;
+$handle = fopen($file, 'a');
 if ($handle === false) {
     respond(500, false, 'Orders storage is unavailable right now. Please try again later.');
 }
 
 flock($handle, LOCK_EX);
-if (fstat($handle)['size'] === 0) {
+if (!$file_exists) {
     fputcsv($handle, ['date', 'name', 'email', 'address']);
 }
 $address = $street . ($apt !== '' ? ' Apt ' . $apt : '') . ', ' . $city;

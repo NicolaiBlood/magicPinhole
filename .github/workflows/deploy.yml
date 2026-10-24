@@ -25,6 +25,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx vite build --base=/magicPinhole/
+        env:
+          VITE_ORDER_DISABLED: 'true'
       # GitHub Pages cannot execute PHP: strip the order endpoint and the
       # Apache-only files so they are not published as plain-text source.
       - run: rm -rf dist/api dist/.htaccess
