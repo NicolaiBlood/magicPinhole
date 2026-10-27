@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://magicpinhole.com/</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://magicpinhole.com/viewer-in-hand.jpg</image:loc>
+      <image:title>Magic Pinhole viewer held between fingertips</image:title>
+      <image:caption>A pocket-sized pinhole viewer for reading without glasses</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://magicpinhole.com/render-front.jpg</image:loc>
+      <image:title>Front face of the Magic Pinhole viewer</image:title>
+      <image:caption>Engraved pinhole viewer front face</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://magicpinhole.com/render-back.jpg</image:loc>
+      <image:title>Back face of the Magic Pinhole viewer</image:title>
+      <image:caption>Engraved pinhole viewer back face with website</image:caption>
+    </image:image>
+  </url>
+</urlset>
