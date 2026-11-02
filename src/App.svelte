@@ -4,7 +4,6 @@
   import viewerPair from './assets/viewer-pair.jpg'
   import renderFront from './assets/render-front.jpg'
   import renderBack from './assets/render-back.jpg'
-  import OrderForm from './OrderForm.svelte'
 
   type Lightbox = { src: string; alt: string; caption: string }
   let lightbox = $state<Lightbox | null>(null)
@@ -73,7 +72,6 @@
 
 <header class="site-header">
   <a class="brand" href="#top">Magic Pinhole</a>
-  <a class="reserve-link" href="#order">Order yours</a>
 </header>
 
 <main>
@@ -345,15 +343,6 @@
     </div>
   </section>
 
-  <section id="order" class="order reveal" use:reveal aria-labelledby="order-heading">
-    <h2 id="order-heading">Order yours</h2>
-    <p class="order-note">
-      The first batch isn't made yet. Leave your name and address and we'll
-      save you a spot — no payment needed until they're ready to ship.
-    </p>
-    <OrderForm />
-  </section>
-
   <section class="donate reveal" use:reveal aria-labelledby="donate-heading">
     <h2 id="donate-heading">Support the project</h2>
     <p class="donate-note">
@@ -449,23 +438,6 @@
     text-decoration: none;
   }
 
-  .reserve-link {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: var(--bg);
-    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
-    border-radius: 999px;
-    padding: 0.5rem 1.1rem;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .reserve-link:focus-visible {
-    outline: 2px solid var(--text);
-    outline-offset: 3px;
-  }
-
   main {
     width: 100%;
     max-width: 68rem;
@@ -550,7 +522,6 @@
   .benefits,
   .use-cases,
   .faq,
-  .order,
   .donate,
   footer {
     padding-top: 2.5rem;
@@ -793,13 +764,6 @@
     border-radius: 0.75rem;
   }
 
-  .order-note {
-    color: var(--muted);
-    margin: 0 auto 1.75rem;
-    max-width: 34rem;
-    text-align: center;
-  }
-
   .donate {
     text-align: center;
   }
@@ -916,11 +880,6 @@
   }
 
   @media (hover: hover) {
-    .reserve-link:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-rest);
-    }
-
     .steps li:hover,
     .benefit-grid li:hover {
       transform: translateY(-3px);
@@ -945,7 +904,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .reserve-link,
     .steps li,
     .benefit-grid li,
     .face-grid figure,
