@@ -1,0 +1,49 @@
+name: Deploy to GoDaddy (cPanel)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godaddy-deploy
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # magicpinhole.com is served from the domain root on GoDaddy, so the
+      # default base "/" is correct here (the Pages workflow uses /magicPinhole/).
+      # If the site ever moves to a subfolder, build with --base=/subfolder/.
+      - run: npm run build
+      # dist/ keeps public/.htaccess, which the Apache host on GoDaddy needs.
+      - name: Refuse unsafe remote dir
+        if: ${{ secrets.GODADDY_REMOTE_DIR == '' || secrets.GODADDY_REMOTE_DIR == '/' }}
+        run: |
+          echo "::error::GODADDY_REMOTE_DIR must be the site's document root (e.g. public_html/), never empty or '/'."
+          exit 1
+      - name: Upload dist/ to GoDaddy over FTPS
+        if: ${{ secrets.GODADDY_FTP_SERVER != '' && secrets.GODADDY_REMOTE_DIR != '/' }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.GODADDY_FTP_SERVER }}
+          port: 21
+          protocol: ftps
+          username: ${{ secrets.GODADDY_FTP_USERNAME }}
+          password: ${{ secrets.GODADDY_FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: ${{ secrets.GODADDY_REMOTE_DIR }}
+          dangerous-clean-slate: true
+      - name: Note skipped deploy
+        if: ${{ secrets.GODADDY_FTP_SERVER == '' }}
+        run: echo "::warning::GODADDY_FTP_SERVER is not set; build only, no deploy. See the Deployment section in README.md."

@@ -53,6 +53,39 @@ Run `svelte-check` to type-check Svelte and TypeScript files:
 npm run check
 ```
 
+## Deployment
+
+Both targets deploy automatically on every push to `main` (and via "Run workflow"):
+
+### GitHub Pages
+
+`.github/workflows/deploy.yml` builds with `--base=/magicPinhole/` and publishes to
+GitHub Pages. `dist/.htaccess` is removed because Pages cannot execute Apache config.
+
+### GoDaddy (cPanel) — magicpinhole.com
+
+`.github/workflows/deploy-godaddy.yml` builds with the default base `/` (the site is
+served from the domain root) and uploads `dist/` over FTPS (explicit TLS, port 21) using
+[SamKirkland/FTP-Deploy-Action](https://github.com/SamKirkland/FTP-Deploy-Action).
+`dist/.htaccess` is kept — the Apache server on GoDaddy uses it for cache headers.
+
+Required repository secrets (Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+| --- | --- |
+| `GODADDY_FTP_SERVER` | FTP hostname, e.g. `ftp.magicpinhole.com` or the server name from cPanel → General Information |
+| `GODADDY_FTP_USERNAME` | A dedicated cPanel FTP account scoped to the site's directory (not the master cPanel login) |
+| `GODADDY_FTP_PASSWORD` | That account's password |
+| `GODADDY_REMOTE_DIR` | The site's document root relative to the FTP home, with a trailing slash, e.g. `public_html/` |
+
+Create the FTP account in cPanel under FTP Accounts, with its directory set to the site's
+document root. `GODADDY_REMOTE_DIR`'s contents are wiped on every deploy
+(`dangerous-clean-slate`), so never set it to `/` or leave it empty — the workflow refuses
+those values. If the deploy fails with a TLS certificate error, add `security: loose` to
+the action in the workflow (GoDaddy's FTP endpoint sometimes presents a certificate that
+does not match the hostname). If the site ever moves into a subfolder of the domain,
+change the build step to `npx vite build --base=/subfolder/`.
+
 ## Project structure
 
 ```
