@@ -1,18 +1,34 @@
 <script lang="ts">
-  import viewerInHand from './assets/viewer-in-hand.jpg'
   import viewerBothFaces from './assets/viewer-both-faces.jpg'
+  import viewerBothFaces480 from './assets/viewer-both-faces-480.jpg'
+  import viewerBothFaces768 from './assets/viewer-both-faces-768.jpg'
   import viewerPair from './assets/viewer-pair.jpg'
+  import viewerPair640 from './assets/viewer-pair-640.jpg'
+  import viewerPair960 from './assets/viewer-pair-960.jpg'
   import renderFront from './assets/render-front.jpg'
   import renderBack from './assets/render-back.jpg'
 
-  type Lightbox = { src: string; alt: string; caption: string }
+  const base = import.meta.env.BASE_URL
+  const heroSrc = `${base}viewer-in-hand.jpg`
+  const heroSrcset = `${base}viewer-in-hand-480.jpg 480w, ${base}viewer-in-hand-768.jpg 768w, ${heroSrc} 1050w`
+
+  type Lightbox = { src: string; alt: string; caption: string; width: number; height: number }
   let lightbox = $state<Lightbox | null>(null)
   let lightboxTrigger = $state<HTMLElement | null>(null)
   let lightboxEl = $state<HTMLElement | null>(null)
+  let headerEl = $state<HTMLElement | null>(null)
+  let mainEl = $state<HTMLElement | null>(null)
 
-  function openLightbox(src: string, alt: string, caption: string, trigger: HTMLElement) {
+  function openLightbox(
+    src: string,
+    alt: string,
+    caption: string,
+    width: number,
+    height: number,
+    trigger: HTMLElement
+  ) {
     lightboxTrigger = trigger
-    lightbox = { src, alt, caption }
+    lightbox = { src, alt, caption, width, height }
   }
 
   function closeLightbox() {
@@ -26,6 +42,8 @@
       viewerBothFaces,
       'Four moulded viewers laid out showing the front and back engraving',
       'Moulded in black, engraved on both faces.',
+      1050,
+      1400,
       event.currentTarget as HTMLElement
     )
 
@@ -34,14 +52,45 @@
       viewerPair,
       'Two viewers side by side, one showing each face',
       'Front and back, side by side.',
+      1800,
+      1012,
       event.currentTarget as HTMLElement
     )
 
+  // While the lightbox is open: focus it, lock background scroll, and make the
+  // rest of the page inert so keyboard/screen-reader users can't reach it.
   $effect(() => {
     if (lightbox && lightboxEl) {
       lightboxEl.focus()
+      const previousOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      headerEl?.setAttribute('inert', '')
+      mainEl?.setAttribute('inert', '')
+      return () => {
+        document.body.style.overflow = previousOverflow
+        headerEl?.removeAttribute('inert')
+        mainEl?.removeAttribute('inert')
+      }
     }
   })
+
+  // Keep Tab focus cycling inside the dialog (focus trap).
+  function onLightboxKeydown(event: KeyboardEvent) {
+    if (event.key !== 'Tab' || !lightboxEl) return
+    const focusables = lightboxEl.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    if (focusables.length === 0) return
+    const first = focusables[0]
+    const last = focusables[focusables.length - 1]
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
 
   const reveal = (node: HTMLElement) => {
     if (typeof IntersectionObserver === 'undefined') {
@@ -50,11 +99,17 @@
     }
     const observer = new IntersectionObserver(
       (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            node.classList.add('is-visible')
-            observer.disconnect()
+        try {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              node.classList.add('is-visible')
+              observer.disconnect()
+            }
           }
+        } catch {
+          // Never leave content hidden if the observer misbehaves.
+          node.classList.add('is-visible')
+          observer.disconnect()
         }
       },
       { threshold: 0.12 }
@@ -70,11 +125,14 @@
   }}
 />
 
-<header class="site-header">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header" bind:this={headerEl}>
   <a class="brand" href="#top">Magic Pinhole</a>
+  <a class="header-cta" href="#donate">Support</a>
 </header>
 
-<main>
+<main id="main" bind:this={mainEl}>
   <section class="hero" id="top">
     <div class="hero-copy">
       <h1>Magic Pinhole</h1>
@@ -88,15 +146,21 @@
         using plain optics to increase your depth of field, so you can read
         menus, labels, and fine print without prescription readers.
       </p>
+      <p class="hero-cta">
+        <a class="cta" href="#donate">Support the project</a>
+      </p>
     </div>
 
     <figure class="hero-art">
       <img
-        src={viewerInHand}
+        src={heroSrc}
+        srcset={heroSrcset}
+        sizes="(min-width: 48rem) 22rem, calc(100vw - 2.5rem)"
         alt="The Magic Pinhole viewer, a small black disc, held between two fingertips"
         width="1050"
         height="1400"
         fetchpriority="high"
+        decoding="async"
       />
       <figcaption>Small enough to live on a keyring.</figcaption>
     </figure>
@@ -143,6 +207,7 @@
           width="713"
           height="507"
           loading="lazy"
+          decoding="async"
         />
         <figcaption><strong>Front</strong> — the pinhole, centred and ready.</figcaption>
       </figure>
@@ -153,6 +218,7 @@
           width="644"
           height="586"
           loading="lazy"
+          decoding="async"
         />
         <figcaption><strong>Back</strong> — where to find us again.</figcaption>
       </figure>
@@ -166,15 +232,18 @@
         <button
           type="button"
           class="zoom-trigger"
-          aria-label="Open larger view"
+          aria-label="Enlarge photo: all four viewers, front and back engraving"
           onclick={openBothFaces}
         >
           <img
             src={viewerBothFaces}
+            srcset={`${viewerBothFaces480} 480w, ${viewerBothFaces768} 768w, ${viewerBothFaces} 1050w`}
+            sizes="(min-width: 48rem) 26rem, calc(100vw - 6rem)"
             alt="Four moulded viewers laid out showing the front and back engraving"
             width="1050"
             height="1400"
             loading="lazy"
+            decoding="async"
           />
         </button>
         <figcaption>Moulded in black, engraved on both faces.</figcaption>
@@ -183,15 +252,18 @@
         <button
           type="button"
           class="zoom-trigger"
-          aria-label="Open larger view"
+          aria-label="Enlarge photo: viewer pair, front and back side by side"
           onclick={openPair}
         >
           <img
             src={viewerPair}
+            srcset={`${viewerPair640} 640w, ${viewerPair960} 960w, ${viewerPair} 1800w`}
+            sizes="(min-width: 48rem) 42rem, calc(100vw - 6rem)"
             alt="Two viewers side by side, one showing each face"
             width="1800"
             height="1012"
             loading="lazy"
+            decoding="async"
           />
         </button>
         <figcaption>Front and back, side by side.</figcaption>
@@ -210,8 +282,8 @@
       <li>
         <h3>No prescription needed</h3>
         <p>
-          No lenses means no optometrist visit. The pinhole works for anyone,
-          regardless of your eyesight.
+          No lenses means no optometrist visit and no prescription to match —
+          the plain optics work for most people as-is.
         </p>
       </li>
       <li>
@@ -259,7 +331,7 @@
       you.
     </p>
     <ul class="use-case-list">
-      <li>Reading a restaurant menu in dim light</li>
+      <li>Reading a restaurant menu when your glasses are at home</li>
       <li>Reading medicine labels and dosage instructions</li>
       <li>Reading price tags and product packaging in shops</li>
       <li>Reading your phone or watch face without readers</li>
@@ -343,32 +415,21 @@
     </div>
   </section>
 
-  <section class="donate reveal" use:reveal aria-labelledby="donate-heading">
+  <section class="donate reveal" id="donate" use:reveal aria-labelledby="donate-heading">
     <h2 id="donate-heading">Support the project</h2>
     <p class="donate-note">
       If you like what we're building, a small donation helps us get the Magic
       Pinhole made.
     </p>
     <div class="donate-card">
-      <form action="https://www.paypal.com/donate" method="post" target="_top">
-        <input type="hidden" name="business" value="XWYQ8A8JDPMWE" />
-        <input type="hidden" name="no_recurring" value="1" />
-        <input type="hidden" name="item_name" value="Donate to Magic Pinhole!" />
-        <input type="hidden" name="currency_code" value="USD" />
-        <input
-          type="image"
-          src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"
-          name="submit"
-          title="PayPal - The safer, easier way to pay online!"
-          alt="Donate with PayPal button"
-        />
-        <img
-          alt=""
-          src="https://www.paypal.com/en_US/i/scr/pixel.gif"
-          width="1"
-          height="1"
-        />
-      </form>
+      <a
+        class="donate-btn"
+        href="https://www.paypal.com/donate?business=XWYQ8A8JDPMWE&amp;no_recurring=1&amp;item_name=Donate%20to%20Magic%20Pinhole!&amp;currency_code=USD"
+        target="_blank"
+        rel="noopener"
+      >
+        Donate with PayPal
+      </a>
     </div>
     <p class="donate-caption">Payments are processed securely by PayPal.</p>
   </section>
@@ -382,7 +443,6 @@
 </main>
 
 {#if lightbox}
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
   <div
     class="lightbox"
     role="dialog"
@@ -390,6 +450,7 @@
     aria-label={lightbox.caption}
     tabindex="-1"
     bind:this={lightboxEl}
+    onkeydown={onLightboxKeydown}
     onclick={(event) => {
       if (event.target === event.currentTarget) closeLightbox()
     }}
@@ -404,12 +465,31 @@
         <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
       </svg>
     </button>
-    <img src={lightbox.src} alt={lightbox.alt} />
+    <img src={lightbox.src} alt={lightbox.alt} width={lightbox.width} height={lightbox.height} />
     <p>{lightbox.caption}</p>
   </div>
 {/if}
 
 <style>
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    z-index: 200;
+    padding: 0.6rem 1rem;
+    background: var(--text);
+    color: var(--bg);
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .skip-link:focus-visible {
+    top: 1rem;
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
   .site-header {
     position: sticky;
     top: 1rem;
@@ -436,6 +516,53 @@
     letter-spacing: -0.02em;
     color: var(--text);
     text-decoration: none;
+  }
+
+  .header-cta {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--panel);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .header-cta:hover {
+    box-shadow: var(--shadow-rest);
+  }
+
+  .header-cta:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .hero-cta {
+    margin: 1.5rem 0 0;
+  }
+
+  .cta {
+    display: inline-block;
+    font-weight: 600;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    box-shadow: var(--shadow-rest);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .cta:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .cta:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
   }
 
   main {
@@ -783,25 +910,28 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .donate form {
-    margin: 0;
-  }
-
-  .donate form input[type='image'] {
-    width: 12rem;
-    max-width: 100%;
-    height: auto;
-    padding: 0.75rem 1rem;
-    border: 0;
-    border-radius: 0.5rem;
+  .donate-btn {
+    display: inline-block;
+    min-width: 12rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .donate form input[type='image']:active {
+  .donate-btn:active {
     transform: scale(0.97);
   }
 
-  .donate form input[type='image']:focus-visible {
+  .donate-btn:hover {
+    box-shadow: var(--shadow-rest);
+  }
+
+  .donate-btn:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
   }
@@ -827,10 +957,12 @@
     inset: 0;
     z-index: 100;
     display: grid;
-    place-content: center;
+    place-content: safe center;
     justify-items: center;
     gap: 1rem;
     padding: 2rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -852,13 +984,13 @@
   }
 
   .lightbox-close {
-    position: absolute;
+    position: fixed;
     top: 1.25rem;
     right: 1.25rem;
     display: grid;
     place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 3rem;
+    height: 3rem;
     padding: 0;
     border: 1px solid var(--line);
     border-radius: 999px;
@@ -897,9 +1029,10 @@
       box-shadow: var(--shadow-lift);
     }
 
-    .donate form input[type='image']:hover {
+    .header-cta:hover,
+    .cta:hover,
+    .donate-btn:hover {
       transform: translateY(-2px);
-      box-shadow: var(--shadow-rest);
     }
   }
 
@@ -909,9 +1042,52 @@
     .face-grid figure,
     .gallery-stack figure,
     .donate-card,
-    .donate form input[type='image'] {
+    .header-cta,
+    .cta,
+    .donate-btn {
       transform: none;
       transition: none;
+    }
+  }
+
+  /* High-contrast / forced-colors: undo gradient text and decorative
+     gradient fills so content stays visible. */
+  @media (forced-colors: active) {
+    h1 {
+      background: none;
+      -webkit-background-clip: border-box;
+      background-clip: border-box;
+      color: CanvasText;
+    }
+
+    h2::after,
+    .use-case-list li::before {
+      background: CanvasText;
+    }
+
+    .step-n {
+      background: Canvas;
+      color: CanvasText;
+      border: 1px solid CanvasText;
+    }
+
+    .cta,
+    .donate-btn {
+      background: ButtonFace;
+      color: ButtonText;
+      border: 1px solid ButtonText;
+    }
+  }
+
+  @media print {
+    .reveal {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    .lightbox,
+    .skip-link {
+      display: none;
     }
   }
 
